@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Slider;
 use App\Models\WelcomeItem;
@@ -33,21 +36,8 @@ use App\Models\Wishlist;
 use App\Models\Subscriber;
 use App\Models\ContactItem;
 use App\Models\TermPrivacyItem;
-
-
-
-
-
-
-
-
-
-
-
-
 use App\Mail\Websitemail;
-use Hash;
-use Auth;
+
 
 class FrontController extends Controller
 {
@@ -59,7 +49,6 @@ class FrontController extends Controller
         $posts = Post::with('blogCategory')->orderBy('id','desc')->get()->take(3);//orderBy('id','desc')=last posts
         $destinations = Destination::orderBy('view_count','desc')->get()->take(8);//orderBy( view_count)==popular
         $packages = Package::with(['destination','package_amenities','package_itineraries','tours','reviews'])->orderBy('id','desc')->get()->take(3);
-        // $home_item = HomeItem::where('id',1)->first();
 
         return view('front.home', compact('sliders','welcome_item','features', 'testimonials', 'posts', 'destinations', 'packages'));//, 'home_item'
     }
@@ -101,7 +90,7 @@ class FrontController extends Controller
 
     public function post($slug)
     {
-        $categories = BlogCategory::orderBy('name','asc')->get();//order asending alphapiti
+        $categories = BlogCategory::orderBy('name','asc')->get();  //order asending alphapitic
         $post = Post::with('blogCategory')->where('slug',$slug)->first();
         $latest_posts = Post::with('blogCategory')->orderBy('id','desc')->get()->take(5);
         return view('front.post', compact('post', 'categories', 'latest_posts'));
@@ -123,7 +112,7 @@ class FrontController extends Controller
     public function destination($slug)
     {
         $destination = Destination::where('slug',$slug)->first();
-        $destination->view_count = $destination->view_count + 1;//update  view count
+        $destination->view_count = $destination->view_count + 1;  //update  view count
         $destination->update();
 
         $destination_photos = DestinationPhoto::where('destination_id',$destination->id)->get();
@@ -239,14 +228,11 @@ class FrontController extends Controller
 
     public function payment(Request $request)
     {
-        //dd($request->all());
 
-        // Check the tour selection
         if(!$request->tour_id) {
             return redirect()->back()->with('error', 'Please select a tour first!');
         }
 
-        // Check the seat availability
         $tour_data = Tour::where('id',$request->tour_id)->first();
         $total_allowed_seats = $tour_data->total_seat;
 
@@ -289,7 +275,6 @@ class FrontController extends Controller
                     ]
                 ]
             ]);
-            //dd($response);
             if(isset($response['id']) && $response['id'] != null) {
                 foreach($response['links'] as $link) {
                     if($link['rel'] == 'approve') {
@@ -314,7 +299,7 @@ class FrontController extends Controller
                             'product_data' => [
                                 'name' => $package->name,
                             ],
-                            'unit_amount' => $request->ticket_price * 100, // Ticket price per person in cents
+                            'unit_amount' => $request->ticket_price * 100, // Ticket price per person
                         ],
                         'quantity' => $request->total_person, // Number of people
                     ],
@@ -323,11 +308,8 @@ class FrontController extends Controller
                 'success_url' => route('stripe_success').'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('stripe_cancel'),
             ]);
-            //dd($response);
             if(isset($response->id) && $response->id != ''){
-                //session()->put('product_name', $request->product_name);
-                //session()->put('quantity', $request->quantity);
-                //session()->put('price', $request->price);
+
                 session()->put('total_person', $request->total_person);
                 session()->put('tour_id', $request->tour_id);
                 session()->put('package_id', $request->package_id);
@@ -361,20 +343,15 @@ class FrontController extends Controller
         $provider->setApiCredentials(config('paypal'));
         $paypalToken = $provider->getAccessToken();
         $response = $provider->capturePaymentOrder($request->token);
-        //dd($response);
         if(isset($response['status']) && $response['status'] == 'COMPLETED') {
 
-            // Insert data into database
             $obj = new Booking;
             $obj->tour_id = session()->get('tour_id');
             $obj->package_id = session()->get('package_id');
             $obj->user_id = session()->get('user_id');
             $obj->total_person = session()->get('total_person');
-            //$obj->payment_id = $response['id'];
             $obj->paid_amount = $response['purchase_units'][0]['payments']['captures'][0]['amount']['value'];
-            //$obj->currency = $response['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code'];
-            // $obj->payer_name = $response['payer']['name']['given_name'];
-            // $obj->payer_email = $response['payer']['email_address'];
+
             $obj->payment_method = "PayPal";
             $obj->payment_status = 'Completed';
             $obj->invoice_no = time();
@@ -404,7 +381,6 @@ class FrontController extends Controller
 
             $stripe = new \Stripe\StripeClient(config('stripe.stripe_sk'));
             $response = $stripe->checkout->sessions->retrieve($request->session_id);
-            //dd($response);
 
 
             $obj = new Booking;
@@ -439,7 +415,6 @@ class FrontController extends Controller
 
     public function review_submit(Request $request)
     {
-        //dd($request->all());
         $request->validate([
             'rating' => 'required',
             'comment' => 'required',
@@ -527,11 +502,7 @@ class FrontController extends Controller
         return redirect()->back()->with('success', 'Your subscribtion is successful.');
     }
 
-    public function terms()
-    {
-        $term_privacy_item = TermPrivacyItem::where('id',1)->first();
-        return view('front.terms', compact('term_privacy_item'));
-    }
+
 
     public function privacy()
     {
@@ -540,14 +511,11 @@ class FrontController extends Controller
     }
 
 
-
-
     public function registration(){
         return view('front.registration');
     }
 
     public function registration_submit(Request $request) {
-        // Validate user input
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
@@ -555,10 +523,8 @@ class FrontController extends Controller
             'retype_password' => 'required|same:password',
         ]);
 
-        // Generate a unique token
         $token = hash('sha256', time());
 
-        // Create a new user and save in the database
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
@@ -566,7 +532,6 @@ class FrontController extends Controller
         $user->token = $token;
         $user->save();
 
-        // Generate the verification link
         $verification_link = route('registration_verify', ['email' => $request->email, 'token' => $token]);
 
         // Define subject and message for the email
@@ -576,24 +541,19 @@ class FrontController extends Controller
         // Send the email using the Websitemail mailable class
         Mail::to($request->email)->send(new Websitemail($subject, $message));
 
-        // Redirect with success message
-        return redirect()->back()->with('success', 'Registration is successful! Please verify your email address to log in. Check your email for the verification link.');
+        return redirect()->back()->with('success', 'Registration is successful');
     }
 
     public function registration_verify($email, $token) {
-        // Find the user with the provided email and token
         $user = User::where('email', $email)->where('token', $token)->first();
 
         if ($user) {
-            // Mark the user as verified (you can add a 'verified' column in your users table)
             $user->email_verified_at = now();
-            $user->token = null; // Clear the token
+            $user->token = null;
             $user->save();
 
-            // Redirect the user to the login page with a success message
             return redirect()->route('login')->with('success', 'Your email has been verified. You can now log in.');
         } else {
-            // If the user is not found or the token is invalid, show an error message
             return redirect()->route('login')->with('error', 'Invalid verification link or the link has expired.');
         }
     }
@@ -609,20 +569,13 @@ class FrontController extends Controller
             'password' => ['required'],
         ]);
 
-        // Attempt to log in the user using the provided email and password
-        // if(Auth::guard('web')->attempt(['email' => $request->email, 'password' => $request->password])) {
-        //     return redirect()->route('user_dashboard')->with('success', 'Login is successful!');
-        // } else {
-        //     return redirect()->route('login')->with('error', 'Invalid login credentials. Please try again.');
-        // }
+
 
         if(Auth::guard('web')->attempt(['email' => $request->email, 'password' => $request->password])) {
-            // Check if previous URL exists and is not the login page
             if ($request->has('previous_url') && $request->previous_url != route('login')) {
                 return redirect($request->previous_url)->with('success', 'Login successful!');
             }
 
-            // Default redirection to user dashboard if no previous URL or if it's the login page
             return redirect()->route('user_dashboard')->with('success', 'Login successful!');
         } else {
             return redirect()->route('login')->with('error', 'Invalid login credentials. Please try again.');
@@ -634,72 +587,8 @@ class FrontController extends Controller
         return redirect()->route('login')->with('success', 'Logout is successful!');
     }
 
-    public function forget_password(){
-        return view('front.forget_password');
-    }
-
-    public function forget_password_submit(Request $request)
-{
-    $request->validate([
-        'email' => ['required', 'email'],
-    ]);
-
-    $user = User::where('email', $request->email)->first();
-    if (!$user) {
-        return redirect()->back()->with('error', 'Email is not found!');
-    }
-
-    // Generate a token and store it in the user's record
-    $token = hash('sha256', time());
-    $user->token = $token;
-    $user->update();
-
-    // Generate the reset link
-    $reset_link = route('reset-password', ['token' => $token, 'email' => $request->email]);
-
-    // Send the email with the reset link
-    $subject = "Password Reset";
-    $message = "To reset your password, please click the link below:<br>";
-    $message .= "<a href='" . $reset_link . "'>Click Here</a>";
-
-    \Mail::to($request->email)->send(new Websitemail($subject, $message));
-
-    return redirect()->back()->with('success', 'We have sent a password reset link to your email');
-}
-
-public function reset_password($token, $email)
-{
-    // Ensure the token and email are valid
-    $user = User::where('email', $email)->where('token', $token)->first();
-
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'Invalid token or email.');
-    }
-
-    // Pass the token and email to the view
-    return view('front.reset-password', compact('token', 'email'));
-}
 
 
-
-    public function reset_password_submit(Request $request, $token, $email)
-    {
-        $request->validate([
-            'password' => ['required'],
-            'retype_password' => ['required', 'same:password'],
-        ]);
-
-        $user = User::where('email', $email)->where('token', $token)->first();
-        if ($user) {
-            $user->password = Hash::make($request->password);
-            $user->token = null; // Clear the token
-            $user->update();
-
-            return redirect()->route('login')->with('success', 'Password reset is successful. You can log in now.');
-        } else {
-            return redirect()->route('login')->with('error', 'Token or email is invalid.');
-        }
-    }
 }
 
 

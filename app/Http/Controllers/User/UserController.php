@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Auth;
+
 use App\Models\User;
 use App\Models\Admin;
 use App\Models\Booking;
@@ -13,6 +13,8 @@ use App\Models\Wishlist;
 use App\Models\Message;
 use App\Models\MessageComment;
 use App\Mail\Websitemail;
+use App\Mail\Auth;
+
 
 class UserController extends Controller
 {
@@ -48,8 +50,6 @@ class UserController extends Controller
         'total_reviews'
     ));
 }
-
-
 
     public function booking()
     {

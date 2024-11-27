@@ -18,7 +18,7 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary btn-lg w_100_p">
-                                    Send Password Reset Link
+                                    Send new Password
                                 </button>
                             </div>
                             <div class="form-group">

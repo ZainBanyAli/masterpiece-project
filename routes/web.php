@@ -306,20 +306,22 @@ Route::prefix('admin')->group(function () {
     // Logout route
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin_logout');
 
+// Forget password routes
+Route::get('/forget-password', [AdminAuthController::class, 'forget_password'])->name('admin_forget_password');
+Route::post('/forget-password-submit', [AdminAuthController::class, 'forget_password_submit'])->name('admin_forget_password_submit');
 
-    // Forget password routes
-    Route::get('/forget-password', [AdminAuthController::class, 'forget_password'])->name('admin_forget_password');
-    Route::post('/forget-password-submit', [AdminAuthController::class, 'forget_password_submit'])->name('admin_forget_password_submit');
+// Reset password routes (includes both token and email)
+Route::get('/reset-password/{token}/{email}', [AdminAuthController::class, 'reset_password'])->name('admin_reset_password');
+Route::post('/reset-password-submit/{token}/{email}', [AdminAuthController::class, 'reset_password_submit'])->name('admin_reset_password_submit');
 
-    // Reset password routes
-    Route::get('/reset-password/{token}/{email}', [AdminAuthController::class, 'reset_password'])->name('admin_reset_password');
-});
 
 
 
 
 // Route for showing the reset password form
-Route::get('reset-password/{token}/{email}', [FrontController::class, 'reset_password'])->name('reset-password');
+Route::get('reset-password/{email}', [FrontController::class, 'reset_password'])->name('reset-password');
 
 // Route for handling the reset password form submission
-Route::post('reset-password/{token}/{email}', [FrontController::class, 'reset_password_submit'])->name('reset_password_submit');
+Route::post('reset-password//{email}', [FrontController::class, 'reset_password_submit'])->name('reset_password_submit');
+
+

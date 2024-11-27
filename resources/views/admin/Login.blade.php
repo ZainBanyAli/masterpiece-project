@@ -115,7 +115,7 @@
 
                             <!-- Submit Button -->
                             <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                                <button type="submit" class="btn btn-danger-btn-lg " style="color: red">Login</button>
                             </div>
 
                             <!-- Forgot Password -->

@@ -55,7 +55,7 @@
                                                 City: {{ $item->city }}<br>
                                                 Zip: {{ $item->zip }}
                                             </td>
-                                            
+
                                             <td class="pt_10 pb_10">
                                                 <a href="{{ route('admin_user_edit',$item->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                                                 <a href="{{ route('admin_user_delete',$item->id) }}" class="btn btn-danger" onClick="return confirm('Are you sure?');"><i class="fas fa-trash"></i></a>

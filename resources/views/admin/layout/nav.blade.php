@@ -29,3 +29,6 @@
         </li>
     </ul>
 </nav>
+
+$p_id=3
+$tour=Tour:where($p_id)

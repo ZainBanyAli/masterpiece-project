@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Auth;
 use App\Models\User;
 use App\Models\Message;
 use App\Models\MessageComment;
@@ -11,6 +12,8 @@ use App\Models\Review;
 use App\Models\Wishlist;
 use App\Models\Booking;
 use App\Mail\Websitemail;
+use Illuminate\Support\Facades\Log;
+
 
 class AdminUserController extends Controller
 {
@@ -116,35 +119,34 @@ class AdminUserController extends Controller
         return redirect()->route('admin_users')->with('success','User is Updated Successfully');
     }
 
+    // public function user_delete($id)
+    // {
+
+    //     $obj = User::where('id',$id)->first();
+    //     unlink(public_path('uploads/'.$obj->photo));
+    //     $obj->delete();
+
+    //     return redirect()->route('admin_users')->with('success','User is Deleted Successfully');
+    // }
+
     public function user_delete($id)
-    {
-        // $total = Review::where('user_id',$id)->count();
-        // if($total > 0)
-        // {
-        //     return redirect()->back()->with('error','User can not be deleted because it has some reviews');
-        // }
+{
+    $obj = User::where('id', $id)->first();
 
-        // $total1 = Message::where('user_id',$id)->count();
-        // if($total1 > 0) {
-        //     return redirect()->back()->with('error','User can not be deleted because it has some messages');
-        // }
+    if (!empty($obj->photo)) {
+        $filePath = public_path('uploads/' . $obj->photo);
 
-        // $total2 = Wishlist::where('user_id',$id)->count();
-        // if($total2 > 0) {
-        //     return redirect()->back()->with('error','User can not be deleted because it has some wishlist');
-        // }
-
-        // $total3 = Booking::where('user_id',$id)->count();
-        // if($total3 > 0) {
-        //     return redirect()->back()->with('error','User can not be deleted because it has some bookings');
-        // }
-
-        $obj = User::where('id',$id)->first();
-        unlink(public_path('uploads/'.$obj->photo));
-        $obj->delete();
-
-        return redirect()->route('admin_users')->with('success','User is Deleted Successfully');
+        if (is_file($filePath)) {
+            unlink($filePath);
+        } else {
+            \Log::error('File not found or invalid path: ' . $filePath);
+        }
     }
+
+    $obj->delete();
+
+    return redirect()->route('admin_users')->with('success', 'User is Deleted Successfully');
+}
 
     public function message()
     {

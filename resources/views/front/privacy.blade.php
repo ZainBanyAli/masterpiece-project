@@ -22,7 +22,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12 col-md-12">
-                <h2>Privacy Policy for ExploreRight Travel Agency  </h2>
+                <h2>Privacy Policy for Travello  Agency  </h2>
                 <br>
                 {!! $term_privacy_item->privacy !!}
             </div>

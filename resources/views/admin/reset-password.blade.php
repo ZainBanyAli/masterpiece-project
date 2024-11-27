@@ -10,13 +10,24 @@
                         <h4 class="text-center">Reset Password</h4>
                     </div>
                     <div class="card-body card-body-auth">
-                        <form method="POST" action="">
+                        {{-- Display validation errors --}}
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('admin_reset_password_submit', ['token' => $token, 'email' => $email]) }}">
                             @csrf
                             <div class="form-group">
-                                <input type="password" class="form-control" name="" placeholder="Password" value="" autofocus>
+                                <input type="password" class="form-control" name="password" placeholder="Password" required autofocus>
                             </div>
                             <div class="form-group">
-                                <input type="password" class="form-control" name="" placeholder="Retype Password" value="">
+                                <input type="password" class="form-control" name="password_confirmation" placeholder="Retype Password" required>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary btn-lg w_100_p">
@@ -30,5 +41,4 @@
         </div>
     </div>
 </section>
-    </div>
 @endsection
